@@ -85,7 +85,7 @@ public class UserDaoJDBCImpl implements UserDao {
         }
         return users;
     }
-
+    // copy to new repo
     public void cleanUsersTable() {
         String sql = "TRUNCATE TABLE users";
 
