@@ -18,7 +18,7 @@ public class UserDaoJDBCImpl implements UserDao {
                  ENGINE = InnoDB\s
                  DEFAULT CHARACTER SET = utf8;""";
 
-        try (Statement statement = Util.getConnection().createStatement()) {
+        try (Connection connection = Util.getConnection(); Statement statement = connection.createStatement()) {
             statement.execute(sql);
         } catch (SQLException e) {
             System.err.println("Не удалось создать таблицу!");
@@ -29,7 +29,7 @@ public class UserDaoJDBCImpl implements UserDao {
     public void dropUsersTable() {
         String sql = "DROP TABLE if exists users";
 
-        try (Statement statement = Util.getConnection().createStatement()) {
+        try (Connection connection = Util.getConnection(); Statement statement = connection.createStatement()) {
             statement.execute(sql);
         } catch (SQLException e) {
             System.err.println("Не удалось удалить таблицу!");
@@ -41,7 +41,7 @@ public class UserDaoJDBCImpl implements UserDao {
     public void saveUser(String name, String lastName, byte age) {
         String sql = "INSERT INTO users (name, lastName, age) VALUES (?, ?, ?)";
 
-        try (PreparedStatement preparedStatement = Util.getConnection().prepareStatement(sql)) {
+        try (Connection connection = Util.getConnection(); PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
 
             preparedStatement.setString(1, name);
             preparedStatement.setString(2, lastName);
@@ -58,7 +58,7 @@ public class UserDaoJDBCImpl implements UserDao {
     public void removeUserById(long id) {
         String sql = "DELETE FROM users WHERE id =" + id + ";";
 
-        try (Statement statement = Util.getConnection().createStatement()) {
+        try (Connection connection = Util.getConnection(); Statement statement = connection.createStatement()) {
             statement.execute(sql);
         } catch (SQLException e) {
             System.err.println("Не удалось удалить User из БД!");
@@ -71,7 +71,7 @@ public class UserDaoJDBCImpl implements UserDao {
         List<User> users = new ArrayList<>();
         ResultSet rst;
 
-        try (Statement statement = Util.getConnection().createStatement()) {
+        try (Connection connection = Util.getConnection(); Statement statement = connection.createStatement()) {
             rst = statement.executeQuery(sql);
 
             while (rst.next()) {
@@ -89,7 +89,7 @@ public class UserDaoJDBCImpl implements UserDao {
     public void cleanUsersTable() {
         String sql = "TRUNCATE TABLE users";
 
-        try (Statement statement = Util.getConnection().createStatement()) {
+        try (Connection connection = Util.getConnection(); Statement statement = connection.createStatement()) {
             statement.execute(sql);
         } catch (SQLException e) {
             System.err.println("Не удалось очистить таблицу Users в БД!");
