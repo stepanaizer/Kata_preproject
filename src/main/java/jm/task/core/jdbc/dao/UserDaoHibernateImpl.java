@@ -27,6 +27,7 @@ public class UserDaoHibernateImpl implements UserDao {
 
     @Override
     public void dropUsersTable() {
+
         String sql = "DROP TABLE if exists users";
         commitTransaction(sql);
     }
@@ -36,9 +37,8 @@ public class UserDaoHibernateImpl implements UserDao {
 
         User user = new User(name, lastName, age);
         Transaction tx = null;
-        Session session = Util.getSessionFactory().getCurrentSession();
 
-        try {
+        try (Session session = Util.getSessionFactory().openSession()) {
             tx = session.beginTransaction();
             session.save(user);
             tx.commit();
@@ -54,9 +54,8 @@ public class UserDaoHibernateImpl implements UserDao {
     public void removeUserById(long id) {
 
         Transaction tx = null;
-        Session session = Util.getSessionFactory().getCurrentSession();
 
-        try {
+        try (Session session = Util.getSessionFactory().openSession()) {
             tx = session.beginTransaction();
             session.createQuery("delete from User where id = :id")
                     .setParameter("id", id)
@@ -69,16 +68,14 @@ public class UserDaoHibernateImpl implements UserDao {
             }
             System.err.println("Ошибка взаимодействия с БД");
         }
-
     }
 
     @Override
     public List<User> getAllUsers() {
 
         Transaction tx = null;
-        Session session = Util.getSessionFactory().getCurrentSession();
 
-        try {
+        try (Session session = Util.getSessionFactory().openSession()) {
             tx = session.beginTransaction();
             List<User> users = session.createQuery("from User", User.class).list();
             tx.commit();
@@ -97,9 +94,8 @@ public class UserDaoHibernateImpl implements UserDao {
 
         String sql = "truncate table users";
         Transaction tx = null;
-        Session session = Util.getSessionFactory().getCurrentSession();
 
-        try {
+        try (Session session = Util.getSessionFactory().openSession()) {
             tx = session.beginTransaction();
             session.createSQLQuery(sql)
                     .executeUpdate();
@@ -113,15 +109,18 @@ public class UserDaoHibernateImpl implements UserDao {
         }
     }
 
-    private static void commitTransaction(String sql) {
-        Session session = Util.getSessionFactory().getCurrentSession();
+    private void commitTransaction(String sql) {
 
-        session.beginTransaction();
-        session.createSQLQuery(sql)
-                .addEntity(User.class)
-                .executeUpdate();
+        try (Session session = Util.getSessionFactory().openSession()) {
+            session.beginTransaction();
+            session.createSQLQuery(sql)
+                    .executeUpdate();
 
-        session.getTransaction()
-                .commit();
+            session.getTransaction()
+                    .commit();
+
+        } catch (HibernateException e) {
+            System.err.println("Ошибка взаимодействия с БД");
+        }
     }
 }
